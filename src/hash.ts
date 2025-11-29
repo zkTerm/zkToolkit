@@ -1,4 +1,4 @@
-import { buildPoseidon, buildMimcSponge, buildPedersenHash } from 'circomlibjs';
+import { buildPoseidon, buildMimcSponge, buildPedersenHash } from "circomlibjs";
 
 let poseidonInstance: any = null;
 let mimcInstance: any = null;
@@ -26,7 +26,12 @@ async function getPedersen() {
 }
 
 function toHex(buffer: Uint8Array): string {
-  return '0x' + Array.from(buffer).map(b => b.toString(16).padStart(2, '0')).join('');
+  return (
+    "0x" +
+    Array.from(buffer)
+      .map((b) => b.toString(16).padStart(2, "0"))
+      .join("")
+  );
 }
 
 function stringToFieldElement(input: string): bigint {
@@ -41,20 +46,20 @@ function stringToFieldElement(input: string): bigint {
 
 export interface PoseidonResult {
   hash: string;
-  algorithm: 'Poseidon';
+  algorithm: "Poseidon";
   input: string | string[];
 }
 
 export interface PedersenResult {
   hash: string;
   point: { x: string; y: string };
-  algorithm: 'Pedersen';
+  algorithm: "Pedersen";
   input: string;
 }
 
 export interface MimcResult {
   hash: string;
-  algorithm: 'MiMC';
+  algorithm: "MiMC";
   input: string;
   key: string;
 }
@@ -62,59 +67,59 @@ export interface MimcResult {
 export const hash = {
   async poseidon(input: string | string[]): Promise<PoseidonResult> {
     const poseidon = await getPoseidon();
-    
+
     let inputs: bigint[];
     if (Array.isArray(input)) {
-      inputs = input.map(i => stringToFieldElement(i));
+      inputs = input.map((i) => stringToFieldElement(i));
     } else {
       inputs = [stringToFieldElement(input)];
     }
-    
+
     const hashResult = poseidon(inputs);
     const hashHex = toHex(poseidon.F.fromMontgomery(hashResult));
-    
+
     return {
       hash: hashHex,
-      algorithm: 'Poseidon',
-      input
+      algorithm: "Poseidon",
+      input,
     };
   },
 
   async pedersen(input: string): Promise<PedersenResult> {
     const pedersen = await getPedersen();
-    
+
     const encoder = new TextEncoder();
     const bytes = encoder.encode(input);
     const buffer = Buffer.from(bytes);
-    
+
     const hashResult = pedersen.hash(buffer);
     const unpackedPoint = pedersen.babyJub.unpackPoint(hashResult);
-    
+
     return {
       hash: toHex(hashResult),
       point: {
         x: unpackedPoint[0].toString(),
-        y: unpackedPoint[1].toString()
+        y: unpackedPoint[1].toString(),
       },
-      algorithm: 'Pedersen',
-      input
+      algorithm: "Pedersen",
+      input,
     };
   },
 
   async mimc(input: string, key?: string): Promise<MimcResult> {
     const mimc = await getMimc();
-    
+
     const inputField = stringToFieldElement(input);
     const keyField = key ? stringToFieldElement(key) : BigInt(0);
-    
+
     const hashResult = mimc.multiHash([inputField], keyField);
-    const hashHex = '0x' + mimc.F.toString(hashResult, 16).padStart(64, '0');
-    
+    const hashHex = "0x" + mimc.F.toString(hashResult, 16).padStart(64, "0");
+
     return {
       hash: hashHex,
-      algorithm: 'MiMC',
+      algorithm: "MiMC",
       input,
-      key: key || '0'
+      key: key || "0",
     };
   },
 
@@ -142,5 +147,5 @@ COMPARISON:
   - MiMC: Simple structure, higher round count
   - SHA-256: ~25,000 constraints (avoid in ZK!)
 `;
-  }
+  },
 };

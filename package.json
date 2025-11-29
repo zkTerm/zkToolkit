@@ -1,5 +1,5 @@
 {
-  "name": "@zkterm/toolkit",
+  "name": "@zkterm/zktoolkit",
   "version": "0.1.0",
   "description": "Zero-Knowledge Cryptography Primitives Toolkit",
   "main": "src/index.ts",
